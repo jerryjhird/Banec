@@ -1,3 +1,5 @@
+// src/blibc/stdlib/printf.c
+
 #include "blibc/stdarg.h"
 #include "blibc/stdio.h"
 #include "blibc/unistd.h"
@@ -84,9 +86,8 @@ int printff(FILE *f, const char *fmt, ...) {
     return written;
 }
 
-// ---------------------------------------------------------------------------
-// Standard print wrappers
-// ---------------------------------------------------------------------------
+
+// print wrappers
 
 int printf(const char *fmt, ...) {
     va_list args;
@@ -120,18 +121,13 @@ int snprintf(char *buf, size_t size, const char *fmt, ...) {
     return written;
 }
 
-// ---------------------------------------------------------------------------
 // va_list variants
-// ---------------------------------------------------------------------------
 
 int vprintf(const char *fmt, va_list ap) {
     return vfprintf(stdout, fmt, ap);
 }
 
 int vfprintf(FILE *f, const char *fmt, va_list ap) {
-    // Simple passthrough to your printff
-    // NOTE: we reimplement as if printff handled va_list
-    // for now, we just reparse manually
     const char *s;
     char numbuf[32];
     int written = 0;

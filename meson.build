@@ -44,6 +44,7 @@ utils = {
     'src/coreutils/kill.c': 'kill',
     'src/coreutils/pkill.c': 'pkill',
     'src/coreutils/whoami.c': 'whoami',
+    'src/coreutils/date.c': 'date'
 }
 
 blibc_src = [

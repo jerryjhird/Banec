@@ -1,4 +1,4 @@
-// include/blibc/base.h
+// include/blibc/null.h
 #pragma once
 
 #ifndef NULL
