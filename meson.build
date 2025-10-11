@@ -59,7 +59,8 @@ blibc_src = [
     'src/blibc/stdlib/qsort.c',
     'src/blibc/stdlib/atoi.c',
     'src/blibc/stdlib/printf.c',
-    'src/blibc/stdlib/fileio.c'
+    'src/blibc/stdlib/fileio.c',
+    'src/blibc/time.c'
 ]
 
 blibc_lib = static_library(
