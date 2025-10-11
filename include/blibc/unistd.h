@@ -1,0 +1,29 @@
+// include/blibc/unistd.h
+#pragma once
+
+#include "blibc/types.h"  /* ssize_t */
+
+/* Standard file descriptor numbers */
+#define STDIN_FILENO   0
+#define STDOUT_FILENO  1
+#define STDERR_FILENO  2
+
+/* access() mode flags */
+#define F_OK 0   /* test for existence of file */
+#define X_OK 1   /* test for execute permission */
+#define W_OK 2   /* test for write permission */
+#define R_OK 4   /* test for read permission */
+
+/* Directory-related constants */
+#ifndef AT_FDCWD
+#define AT_FDCWD (-100)
+#endif
+
+ssize_t write(int fd, const void *buf, size_t count);
+ssize_t bwrite(int fd, const void *buf, size_t count); // buffered write
+void flush(int fd); // for bwrite
+
+ssize_t read(int fd, void *buf, size_t count);
+char *getcwd(char *buf, size_t size);
+int isatty(int fd);
+int access(const char *path, int mode);

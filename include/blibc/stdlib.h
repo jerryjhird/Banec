@@ -1,0 +1,25 @@
+#pragma once
+#include "blibc/types.h"
+
+/* malloc family */
+void *malloc(size_t size);
+void free(void *ptr);
+
+/* hardened malloc */
+void *hmalloc(size_t size);
+
+/* sorting */
+void qsort(void *base, size_t nmemb, size_t size,
+           int (*compar)(const void *, const void *));
+
+
+void exit(int status);
+
+char *getenv(const char *name);
+
+int atoi(const char *s);
+long atol(const char *s);
+long long atoll(const char *s);
+
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
