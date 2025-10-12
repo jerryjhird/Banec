@@ -12,13 +12,24 @@
 #define MAX_PATH CONF_MAX_PATH
 #define MAX_NAMES 1024
 
-static const char *color_for(unsigned char d_type, mode_t mode) {
-    switch (d_type) {
-        case DT_DIR:  return CONF_COLOR_DIR;
-        case DT_REG:  return (mode & S_IXUSR) ? CONF_COLOR_EXEC : CONF_COLOR_FILE;
-        case DT_LNK:  return CONF_COLOR_LINK;
-        default:      return CONF_COLOR_UNKNOWN_FSOBJ;
+static const char *color_for(const char *path) {
+    struct stat st;
+    if (stat(path, &st) < 0)
+        return CONF_COLOR_UNKNOWN_FSOBJ;
+
+    if (S_ISDIR(st.st_mode))  return CONF_COLOR_DIR;
+    if (S_ISLNK(st.st_mode))  return CONF_COLOR_LINK;
+    if (S_ISCHR(st.st_mode))  return CONF_COLOR_CHARDEV;
+    if (S_ISBLK(st.st_mode))  return CONF_COLOR_BLOCKDEV;
+    if (S_ISFIFO(st.st_mode)) return CONF_COLOR_FIFO;
+    if (S_ISSOCK(st.st_mode)) return CONF_COLOR_SOCKET;
+    if (S_ISREG(st.st_mode)) {
+        if (st.st_mode & S_IXUSR)
+            return CONF_COLOR_EXEC;
+        return CONF_COLOR_FILE;
     }
+
+    return CONF_COLOR_UNKNOWN_FSOBJ;
 }
 
 int main(int argc, char **argv) {
@@ -28,14 +39,12 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
 
     char names[MAX_NAMES][MAX_PATH];
-    unsigned char types[MAX_NAMES];
     size_t n = 0;
 
     struct dirent *ent;
     while ((ent = readdir(dir)) && n < MAX_NAMES) {
         strncpy(names[n], ent->d_name, MAX_PATH - 1);
         names[n][MAX_PATH - 1] = '\0';
-        types[n] = ent->d_type;
         n++;
     }
     closedir(dir);
@@ -48,7 +57,8 @@ int main(int argc, char **argv) {
     const int tty = isatty(STDOUT_FILENO);
     const char *reset = tty ? "\x1b[0m" : "";
 
-    // Two-pass display: non-dot entries first, then . and ..
+    size_t current_line_len = 0;
+
     for (int pass = 0; pass < 2; pass++) {
         for (size_t i = 0; i < n; i++) {
             const char *name = names[i];
@@ -66,40 +76,30 @@ int main(int argc, char **argv) {
             else
                 snprintf(full, sizeof(full), "%s/%s", path, name);
 
-            const char *color = "";
-
             if (tty) {
-                unsigned char dtype = types[i];
-                mode_t mode = 0;
+                const char *color = color_for(full);
+                size_t name_len = strlen(name) + 2; // +2 for spacing
 
-                if (dtype == DT_UNKNOWN) {
-                    struct stat st;
-                    if (stat(full, &st) == 0) {
-                        if (S_ISDIR(st.st_mode)) dtype = DT_DIR;
-                        else if (S_ISLNK(st.st_mode)) dtype = DT_LNK;
-                        else dtype = DT_REG;
-                        mode = st.st_mode;
-                    } else {
-                        dtype = DT_UNKNOWN;
-                    }
+                if (current_line_len + name_len > CONF_MAX_CHAR_OUTPUT) {
+                    bwrite(1, "\n", 1);
+                    current_line_len = 0;
                 }
 
-                color = color_for(dtype, mode);
-            }
-
-            if (tty) {
                 if (*color) bwrite(1, color, strlen(color));
                 bwrite(1, name, strlen(name));
                 if (*color) bwrite(1, reset, strlen(reset));
                 bwrite(1, "  ", 2);
+
+                current_line_len += name_len;
             } else {
+                // notty so one file per line
                 bwrite(1, name, strlen(name));
                 bwrite(1, "\n", 1);
             }
         }
     }
 
-    if (tty)
+    if (tty && current_line_len > 0)
         bwrite(1, "\n", 1);
 
     return 0;
