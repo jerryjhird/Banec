@@ -138,8 +138,20 @@ int printf(const char *fmt, ...) {
     va_start(args, fmt);
     int written = vfprintf(stdout, fmt, args);
     va_end(args);
+
+    // auto flush on newline : TODO: FIND BETTER ALTERNATIVE
+    const char *p = fmt;
+    while (*p) {
+        if (*p == '\n') {
+            flush(1);
+            break;
+        }
+        p++;
+    }
+
     return written;
 }
+
 
 int fprintf(FILE *f, const char *fmt, ...) {
     va_list args;

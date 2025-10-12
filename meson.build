@@ -46,7 +46,7 @@ utils = {
     'src/coreutils/whoami.c': 'whoami',
     'src/coreutils/date.c': 'date',
     'src/coreutils/rm.c': 'rm',
-    'src/coreutils/rmdir.c': 'rmdir'
+    'src/coreutils/rmdir.c': 'rmdir',
 }
 
 blibc_src = [
@@ -63,6 +63,7 @@ blibc_src = [
     'src/blibc/stdlib/atoi.c',
     'src/blibc/stdlib/printf.c',
     'src/blibc/stdlib/fileio.c',
+    'src/blibc/stdlib/scanf.c',
     'src/blibc/time.c'
 ]
 

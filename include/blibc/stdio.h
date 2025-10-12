@@ -37,6 +37,8 @@ int fputc(int c, FILE *f);
 int fputs(const char *s, FILE *f);
 int puts(const char *s);
 
+int scanf(const char *fmt, ...);
+
 // file operations
 FILE *fopen(const char *path, const char *mode);
 int fclose(FILE *f);

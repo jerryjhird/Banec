@@ -21,6 +21,8 @@ char *getenv(const char *name);
 int atoi(const char *s);
 long atol(const char *s);
 long long atoll(const char *s);
+double atof(const char *s);
+
 char *itoa(int value, char *str, int base);
 
 #define EXIT_SUCCESS 0
