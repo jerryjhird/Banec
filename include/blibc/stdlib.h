@@ -20,6 +20,7 @@ char *getenv(const char *name);
 int atoi(const char *s);
 long atol(const char *s);
 long long atoll(const char *s);
+char *itoa(int value, char *str, int base);
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1

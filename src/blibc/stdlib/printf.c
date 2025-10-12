@@ -3,6 +3,35 @@
 #include "blibc/stdarg.h"
 #include "blibc/stdio.h"
 #include "blibc/unistd.h"
+#include "blibc/string.h"
+
+char *itoa(int value, char *str, int base) {
+    if (base < 2 || base > 36) {
+        *str = '\0';
+        return str;
+    }
+
+    char *p = str;
+    unsigned int u = (value < 0 && base == 10) ? -value : value;
+
+    char buf[32];
+    int i = 0;
+
+    do {
+        unsigned digit = u % base;
+        buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
+        u /= base;
+    } while (u);
+
+    if (value < 0 && base == 10)
+        buf[i++] = '-';
+
+    int j = 0;
+    while (i--)
+        p[j++] = buf[i];
+    p[j] = '\0';
+    return str;
+}
 
 // core low-level write
 int fputc(int c, FILE *f) {
@@ -65,14 +94,29 @@ int printff(FILE *f, const char *fmt, ...) {
             case 'd':
             case 'i': {
                 int val = va_arg(args, int);
-                char *p = numbuf + sizeof(numbuf);
-                *--p = '\0';
-                int neg = val < 0;
-                unsigned u = neg ? -val : val;
-                do *--p = '0' + (u % 10); while (u /= 10);
-                if (neg) *--p = '-';
-                fputs(p, f);
-                written += (numbuf + sizeof(numbuf) - 1) - p;
+                itoa(val, numbuf, 10);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'u': {
+                unsigned val = va_arg(args, unsigned);
+                itoa(val, numbuf, 10);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'x': {
+                unsigned val = va_arg(args, unsigned);
+                itoa(val, numbuf, 16);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'c': {
+                int c = va_arg(args, int);
+                fputc(c, f);
+                written++;
                 break;
             }
             case '%':
@@ -149,14 +193,29 @@ int vfprintf(FILE *f, const char *fmt, va_list ap) {
             case 'd':
             case 'i': {
                 int val = va_arg(ap, int);
-                char *p = numbuf + sizeof(numbuf);
-                *--p = '\0';
-                int neg = val < 0;
-                unsigned u = neg ? -val : val;
-                do *--p = '0' + (u % 10); while (u /= 10);
-                if (neg) *--p = '-';
-                fputs(p, f);
-                written += (numbuf + sizeof(numbuf) - 1) - p;
+                itoa(val, numbuf, 10);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'u': {
+                unsigned val = va_arg(ap, unsigned);
+                itoa(val, numbuf, 10);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'x': {
+                unsigned val = va_arg(ap, unsigned);
+                itoa(val, numbuf, 16);
+                fputs(numbuf, f);
+                written += strlen(numbuf);
+                break;
+            }
+            case 'c': {
+                int c = va_arg(ap, int);
+                fputc(c, f);
+                written++;
                 break;
             }
             case '%':
@@ -178,6 +237,7 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
 
     char *p = buf;
     const char *end = buf + size - 1;
+    char tmp[32];
 
     for (; *fmt && p < end; fmt++) {
         if (*fmt != '%') {
@@ -191,12 +251,18 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
             while (*s && p < end) *p++ = *s++;
         } else if (*fmt == 'd' || *fmt == 'i') {
             int val = va_arg(ap, int);
-            char tmp[32];
-            char *t = tmp + sizeof(tmp);
-            *--t = '\0';
-            unsigned int u = (val < 0) ? -val : val;
-            do *--t = '0' + (u % 10); while (u /= 10);
-            if (val < 0 && p < end) *p++ = '-';
+            itoa(val, tmp, 10);
+            const char *t = tmp;
+            while (*t && p < end) *p++ = *t++;
+        } else if (*fmt == 'u') {
+            unsigned val = va_arg(ap, unsigned);
+            itoa(val, tmp, 10);
+            const char *t = tmp;
+            while (*t && p < end) *p++ = *t++;
+        } else if (*fmt == 'x') {
+            unsigned val = va_arg(ap, unsigned);
+            itoa(val, tmp, 16);
+            const char *t = tmp;
             while (*t && p < end) *p++ = *t++;
         } else if (*fmt == 'c') {
             int c = va_arg(ap, int);
