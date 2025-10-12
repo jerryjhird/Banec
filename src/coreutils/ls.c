@@ -1,3 +1,5 @@
+// src/coreutils/ls.c
+
 #include "config/ls.h"
 #include "config/global.h"
 #include "blibc/dirent.h"
@@ -10,17 +12,13 @@
 #define MAX_PATH CONF_MAX_PATH
 #define MAX_NAMES 1024
 
-static const char *color_for(const char *path) {
-    struct stat st;
-    if (stat(path, &st) == -1)
-        return CONF_COLOR_FILE;
-
-    if (S_ISDIR(st.st_mode))
-        return CONF_COLOR_DIR;
-    if (st.st_mode & S_IXUSR)
-        return CONF_COLOR_EXEC;
-
-    return CONF_COLOR_UNKNOWN_FSOBJ;
+static const char *color_for(unsigned char d_type, mode_t mode) {
+    switch (d_type) {
+        case DT_DIR:  return CONF_COLOR_DIR;
+        case DT_REG:  return (mode & S_IXUSR) ? CONF_COLOR_EXEC : CONF_COLOR_FILE;
+        case DT_LNK:  return CONF_COLOR_LINK;
+        default:      return CONF_COLOR_UNKNOWN_FSOBJ;
+    }
 }
 
 int main(int argc, char **argv) {
@@ -30,12 +28,14 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
 
     char names[MAX_NAMES][MAX_PATH];
+    unsigned char types[MAX_NAMES];
     size_t n = 0;
 
     struct dirent *ent;
     while ((ent = readdir(dir)) && n < MAX_NAMES) {
         strncpy(names[n], ent->d_name, MAX_PATH - 1);
         names[n][MAX_PATH - 1] = '\0';
+        types[n] = ent->d_type;
         n++;
     }
     closedir(dir);
@@ -60,9 +60,32 @@ int main(int argc, char **argv) {
                 continue;
 
             char full[MAX_PATH];
-            snprintf(full, sizeof(full), "%s/%s", path, name);
+            size_t plen = strlen(path);
+            if (plen > 0 && path[plen - 1] == '/')
+                snprintf(full, sizeof(full), "%s%s", path, name);
+            else
+                snprintf(full, sizeof(full), "%s/%s", path, name);
 
-            const char *color = tty ? color_for(full) : "";
+            const char *color = "";
+
+            if (tty) {
+                unsigned char dtype = types[i];
+                mode_t mode = 0;
+
+                if (dtype == DT_UNKNOWN) {
+                    struct stat st;
+                    if (stat(full, &st) == 0) {
+                        if (S_ISDIR(st.st_mode)) dtype = DT_DIR;
+                        else if (S_ISLNK(st.st_mode)) dtype = DT_LNK;
+                        else dtype = DT_REG;
+                        mode = st.st_mode;
+                    } else {
+                        dtype = DT_UNKNOWN;
+                    }
+                }
+
+                color = color_for(dtype, mode);
+            }
 
             if (tty) {
                 if (*color) bwrite(1, color, strlen(color));

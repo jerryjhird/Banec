@@ -1,4 +1,5 @@
 // src/coreutils/pkill.c
+
 #include "util/proc.h"
 #include "blibc/signal.h"
 #include "blibc/stdlib.h"
@@ -15,7 +16,7 @@ struct pkill_data {
 static void do_kill(int pid, const char *name, void *udata) {
     struct pkill_data *d = udata;
     if (strcmp(name, d->target) == 0) {
-        bsyscall(SYS_kill, pid, d->sig);
+        syscall(SYS_kill, pid, d->sig);
         d->killed++;
     }
 }

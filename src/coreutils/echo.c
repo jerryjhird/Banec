@@ -1,3 +1,5 @@
+// src/coreutils/echo.c
+
 #include "blibc/stdio.h"
 
 int main(int argc, char **argv) {

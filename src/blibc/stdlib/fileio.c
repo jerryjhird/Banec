@@ -45,7 +45,7 @@ FILE *fopen(const char *path, const char *mode) {
     else
         return NULL;
 
-    long fd = bsyscall(SYS_open, path, flags, 0644);
+    long fd = syscall(SYS_open, path, flags, 0644);
     if (fd < 0) {
         errno = (int)-fd;
         return NULL;
@@ -53,7 +53,7 @@ FILE *fopen(const char *path, const char *mode) {
 
     FILE *f = (FILE *)malloc(sizeof(FILE));
     if (!f) {
-        bsyscall(SYS_close, fd);
+        syscall(SYS_close, fd);
         return NULL;
     }
 
@@ -65,7 +65,7 @@ FILE *fopen(const char *path, const char *mode) {
 
 int fclose(FILE *f) {
     if (!f) return EOF;
-    long ret = bsyscall(SYS_close, f->fd);
+    long ret = syscall(SYS_close, f->fd);
     int result = (ret < 0) ? EOF : 0;
     free(f);
     return result;
@@ -75,7 +75,7 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *f) {
     if (!f) return 0;
 
     size_t total = size * nmemb;
-    long ret = bsyscall(SYS_read, f->fd, ptr, total);
+    long ret = syscall(SYS_read, f->fd, ptr, total);
 
     if (ret < 0) {
         f->error = 1;

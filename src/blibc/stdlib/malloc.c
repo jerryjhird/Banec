@@ -1,13 +1,10 @@
-// minimal malloc/hmalloc implementation (Linux x86_64)
-// provides: malloc/free and hardened hmalloc/hfree
-// dependencies: bsyscall(), SYS_* numbers in blibc/syscall.h
+// src/blibc/stdlib/malloc.c
 
 #include "blibc/syscall.h"
 #include "blibc/errno.h"
 #include "blibc/types.h"
 #include "blibc/stdint.h"
 
-/* --- minimal constants --- */
 #define PROT_NONE   0
 #define PROT_READ   1
 #define PROT_WRITE  2
@@ -17,48 +14,31 @@
 
 #define PAGE_SIZE 4096UL
 
-#ifndef SYS_mmap
-#error "SYS_mmap must be defined in blibc/syscall.h"
-#endif
-#ifndef SYS_munmap
-#error "SYS_munmap must be defined in blibc/syscall.h"
-#endif
-#ifndef SYS_mprotect
-#error "SYS_mprotect must be defined in blibc/syscall.h"
-#endif
-#ifndef SYS_write
-#error "SYS_write must be defined in blibc/syscall.h"
-#endif
-#ifndef SYS_exit_group
-#error "SYS_exit_group must be defined in blibc/syscall.h"
-#endif
-
-/* --- helpers --- */
 static inline size_t align_up(size_t v, size_t a) {
     return (v + (a - 1)) & ~(a - 1);
 }
 
-/* write a message to stderr then exit */
+// write a message to stderr then exit
 static void abort_msg(const char *msg) {
     long len = 0;
     if (msg) {
         const char *p = msg;
         while (*p++) len++;
-        bsyscall(SYS_write, (long)2, (long)(uintptr_t)msg, (long)len);
+        syscall(SYS_write, (long)2, (long)(uintptr_t)msg, (long)len);
     }
-    bsyscall(SYS_exit_group, (long)127);
+    syscall(SYS_exit_group, (long)127);
     for (;;);
 }
 
-/* --- basic mmap-backed malloc/free --- */
+// basic mmap-backed malloc/free
 struct mmhdr {
     uint64_t magic;
     size_t   total_size;
 };
 
-#define MM_MAGIC 0x4D4D414749435FUL  /* "MMAGIC" */
+#define MM_MAGIC 0x4D4D414749435FUL  // "MMAGIC"
 
-/* malloc: allocate single mmap region (header + payload) */
+// malloc: allocate mmap region (header + payload)
 void *malloc(size_t size) {
     if (size == 0) return (void *)0;
 
@@ -66,7 +46,7 @@ void *malloc(size_t size) {
     size_t raw = sizeof(struct mmhdr) + payload;
     size_t total = (raw + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
 
-    long ret = bsyscall(SYS_mmap,
+    long ret = syscall(SYS_mmap,
                         (long)0,
                         (long)total,
                         (long)(PROT_READ | PROT_WRITE),
@@ -95,25 +75,25 @@ void free(void *ptr) {
         abort_msg("free: invalid pointer or corrupted header\n");
     }
 
-    bsyscall(SYS_munmap, (long)(uintptr_t)h, (long)h->total_size);
+    syscall(SYS_munmap, (long)(uintptr_t)h, (long)h->total_size);
 }
 
-/* --- hardened allocator (hmalloc/hfree) --- */
+// hardened allocator (hmalloc/hfree)
 struct hhdr {
     uint64_t magic;
     uint64_t canary;
     size_t   payload_size;
     size_t   total_size;
     void    *base_addr;
-    unsigned int flags; /* 1 = allocated, 0 = freed */
+    unsigned int flags; // 1 = allocated, 0 = freed
     unsigned int _pad;
 };
 
 typedef uint64_t hfoot_t;
 
-#define HHDR_MAGIC 0x48414E444C4F434BULL /* "HANDLOCK" */
+#define HHDR_MAGIC 0x48414E444C4F434BULL // "HANDLOCK"
 
-/* compute simple canary from header address + payload size */
+// compute simple canary from header address + payload size
 static uint64_t compute_canary(struct hhdr *h) {
     uint64_t a = (uint64_t)(uintptr_t)h;
     uint64_t s = (uint64_t)h->payload_size;
@@ -121,7 +101,7 @@ static uint64_t compute_canary(struct hhdr *h) {
     return (v << 13) | (v >> (64 - 13));
 }
 
-/* allocate with guard pages + canaries */
+// allocate with guard pages + canaries
 void *hmalloc(size_t size) {
     if (size == 0) return (void *)0;
 
@@ -131,7 +111,7 @@ void *hmalloc(size_t size) {
     size_t total_pages = (need + PAGE_SIZE - 1) / PAGE_SIZE;
     size_t total_size = total_pages * PAGE_SIZE;
 
-    long ret = bsyscall(SYS_mmap,
+    long ret = syscall(SYS_mmap,
                         (long)0,
                         (long)total_size,
                         (long)(PROT_READ | PROT_WRITE),
@@ -148,21 +128,21 @@ void *hmalloc(size_t size) {
     void *middle_ptr = (void *)((uintptr_t)map + PAGE_SIZE);
     void *guard2 = (void *)((uintptr_t)map + total_size - PAGE_SIZE);
 
-    long r = bsyscall(SYS_mprotect,
+    long r = syscall(SYS_mprotect,
                       (long)(uintptr_t)guard1,
                       (long)PAGE_SIZE,
                       (long)PROT_NONE);
     if (r < 0) {
-        bsyscall(SYS_munmap, (long)(uintptr_t)map, (long)total_size);
+        syscall(SYS_munmap, (long)(uintptr_t)map, (long)total_size);
         errno = (int)(-r);
         return (void *)0;
     }
-    r = bsyscall(SYS_mprotect,
+    r = syscall(SYS_mprotect,
                  (long)(uintptr_t)guard2,
                  (long)PAGE_SIZE,
                  (long)PROT_NONE);
     if (r < 0) {
-        bsyscall(SYS_munmap, (long)(uintptr_t)map, (long)total_size);
+        syscall(SYS_munmap, (long)(uintptr_t)map, (long)total_size);
         errno = (int)(-r);
         return (void *)0;
     }
@@ -182,19 +162,10 @@ void *hmalloc(size_t size) {
 
     void *user = (void *)((uintptr_t)middle_ptr + sizeof(struct hhdr));
 
-#ifdef BLIBC_POISON
-    /* poison with 0xAA for debugging (optional) */
-    {
-        unsigned char *q = (unsigned char *)user;
-        for (size_t i = 0; i < payload; ++i)
-            q[i] = 0xAA;
-    }
-#endif
-
     return user;
 }
 
-/* free + verify canary + unmap */
+// free + verify canary + unmap 
 void hfree(void *ptr) {
     if (!ptr) return;
 
@@ -214,23 +185,14 @@ void hfree(void *ptr) {
 
     h->flags = 0;
 
-#ifdef BLIBC_POISON
-    /* overwrite freed memory with 0x55 */
-    {
-        unsigned char *u = (unsigned char *)ptr;
-        for (size_t i = 0; i < h->payload_size; ++i)
-            u[i] = 0x55;
-    }
-#endif
-
-    long r = bsyscall(SYS_munmap, (long)(uintptr_t)h->base_addr, (long)h->total_size);
+    long r = syscall(SYS_munmap, (long)(uintptr_t)h->base_addr, (long)h->total_size);
     if (r < 0)
         abort_msg("hfree: munmap failed\n");
 }
 
-/* --- minimal exit/getenv stubs --- */
+// minimal exit/getenv stubs
 void exit(int status) {
-    bsyscall(SYS_exit_group, (long)status);
+    syscall(SYS_exit_group, (long)status);
     for (;;);
 }
 

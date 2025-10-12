@@ -1,12 +1,11 @@
 // src/blibc/syscall.c
-// Linux x86_64 syscall()
 
 #include "blibc/syscall.h"
 #include "blibc/stdarg.h"
 #include "blibc/stdint.h"
 #include "blibc/errno.h"
 
-long bsyscall(long n, ...) {
+long syscall(long n, ...) {
     va_list ap;
     va_start(ap, n);
 

@@ -1,3 +1,5 @@
+// src/coreutils/whoami.c
+
 #include "blibc/string.h"
 #include "blibc/stdlib.h"
 #include "blibc/unistd.h"

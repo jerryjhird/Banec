@@ -1,4 +1,5 @@
-// src/coreutils/testutil.c — compiles to "test"
+// src/coreutils/testutil.c
+
 #include "blibc/string.h"
 #include "blibc/unistd.h"
 #include "blibc/stat.h"

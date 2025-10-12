@@ -1,3 +1,5 @@
+// src/blibc/string.c
+
 #include "blibc/string.h"
 #include "blibc/stddef.h"
 

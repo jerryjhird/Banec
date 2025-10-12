@@ -16,7 +16,7 @@ static size_t bpos1 = 0;
 static size_t bpos2 = 0;
 
 ssize_t write(int fd, const void *buf, size_t count) {
-    long ret = bsyscall(SYS_write, fd, buf, count);
+    long ret = syscall(SYS_write, fd, buf, count);
     if (ret < 0) {
         errno = (int)-ret;
         __set_io_error(fd);
@@ -39,7 +39,7 @@ ssize_t bwrite(int fd, const void *buf, size_t count) {
     const char *src = buf;
     for (size_t i = 0; i < count; ++i) {
         if (*pos >= BW_BUFSIZE) {
-            bsyscall(SYS_write, fd, target, *pos);
+            syscall(SYS_write, fd, target, *pos);
             *pos = 0;
         }
         target[(*pos)++] = src[i];
@@ -56,13 +56,13 @@ void flush(int fd) {   // flush bwrite buffer
     else return;
 
     if (*pos > 0) {
-        bsyscall(SYS_write, fd, target, *pos);
+        syscall(SYS_write, fd, target, *pos);
         *pos = 0;
     }
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-    long ret = bsyscall(SYS_read, fd, buf, count);
+    long ret = syscall(SYS_read, fd, buf, count);
     if (ret < 0) {
         errno = (int)-ret;
         __set_io_error(fd);
@@ -75,7 +75,7 @@ ssize_t read(int fd, void *buf, size_t count) {
 }
 
 char *getcwd(char *buf, size_t size) {
-    long ret = bsyscall(SYS_getcwd, buf, size);
+    long ret = syscall(SYS_getcwd, buf, size);
     if (ret < 0) {
         errno = (int)-ret;
         return NULL;
@@ -85,7 +85,7 @@ char *getcwd(char *buf, size_t size) {
 
 int isatty(int fd) {
     struct termios t;
-    long ret = bsyscall(SYS_ioctl, fd, 0x5401 /* TCGETS */, (long)&t);
+    long ret = syscall(SYS_ioctl, fd, 0x5401 /* TCGETS */, (long)&t);
     if (ret < 0) {
         errno = (int)-ret;
         return 0;  // not tty
@@ -99,9 +99,9 @@ int access(const char *path, int mode) {
 
     // Prefer faccessat(AT_FDCWD, path, mode, 0)
 #if defined(SYS_faccessat)
-    ret = bsyscall(SYS_faccessat, AT_FDCWD, path, mode, 0);
+    ret = syscall(SYS_faccessat, AT_FDCWD, path, mode, 0);
 #elif defined(SYS_access)
-    ret = bsyscall(SYS_access, path, mode);
+    ret = syscall(SYS_access, path, mode);
 #else
 #   error "SYS_faccessat or SYS_access not defined in blibc/syscall.h"
 #endif

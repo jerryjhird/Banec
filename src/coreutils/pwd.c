@@ -1,4 +1,4 @@
-// src/coreutils/pwd.c — print working directory
+// src/coreutils/pwd.c
 
 #include "config/global.h"
 #include "blibc/unistd.h"

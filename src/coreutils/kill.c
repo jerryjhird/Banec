@@ -1,4 +1,5 @@
 // src/coreutils/kill.c
+
 #include "blibc/signal.h"
 #include "blibc/syscall.h"
 #include "blibc/stdlib.h"
@@ -13,7 +14,7 @@ int main(int argc, char **argv) {
     int pid = atoi(argv[1]);
     int sig = (argc > 2) ? atoi(argv[2]) : SIGTERM;
 
-    long ret = bsyscall(SYS_kill, pid, sig);
+    long ret = syscall(SYS_kill, pid, sig);
     if (ret < 0) {
         puts("kill: failed");
         return 1;

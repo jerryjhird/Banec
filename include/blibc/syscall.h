@@ -1,14 +1,7 @@
 // include/blibc/syscall.h
-
 #pragma once
 
-#include "blibc/stdint.h"  // for integer types
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-long bsyscall(long n, ...);
+long syscall(long n, ...);
 
 // common syscall numbers for Linux x86_64
 #define SYS_read        0
@@ -98,6 +91,7 @@ long bsyscall(long n, ...);
 #define SYS_setpgid  109
 #define SYS_gettid   186
 #define SYS_futex    202
+#define SYS_getdents64 217
 #define SYS_set_tid_address 218
 #define SYS_clock_gettime 228
 #define SYS_exit_group 231
@@ -107,7 +101,3 @@ long bsyscall(long n, ...);
 #define SYS_unlinkat 263
 #define SYS_mkdirat  258
 #define SYS_close_range 436
-
-#ifdef __cplusplus
-}
-#endif

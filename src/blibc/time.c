@@ -1,3 +1,5 @@
+// src/blibc/time.c
+
 #include "blibc/time.h"
 #include "blibc/syscall.h"
 #include "blibc/null.h"
@@ -11,7 +13,7 @@ static int is_leap(int year) {
 
 // syscalll wrapper for sys_clock_gettime
 int clock_gettime(int clk_id, struct timespec *tp) {
-    return (int) bsyscall(SYS_clock_gettime, (long) clk_id, (long) tp, 0);
+    return (int) syscall(SYS_clock_gettime, (long) clk_id, (long) tp, 0);
 }
 
 time_t time(time_t *t) {

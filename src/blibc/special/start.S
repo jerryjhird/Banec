@@ -1,6 +1,4 @@
-/* src/blibc/special/start.S
- * Minimal _start: pass RSP to __blibc_start_c and exit with returned code.
- */
+/* src/blibc/special/start.S */
     .text
     .global _start
     .type _start, @function

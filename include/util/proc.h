@@ -9,10 +9,10 @@
 static inline int proc_name_for_pid(int pid, char *buf, size_t size) {
     char path[64];
     snprintf(path, sizeof(path), "/proc/%d/comm", pid);
-    int fd = bsyscall(SYS_open, path, 0, 0);
+    int fd = syscall(SYS_open, path, 0, 0);
     if (fd < 0) return -1;
-    ssize_t n = bsyscall(SYS_read, fd, buf, size - 1);
-    bsyscall(SYS_close, fd);
+    ssize_t n = syscall(SYS_read, fd, buf, size - 1);
+    syscall(SYS_close, fd);
     if (n <= 0) return -1;
     buf[n] = '\0';
     if (buf[n - 1] == '\n') buf[n - 1] = '\0';

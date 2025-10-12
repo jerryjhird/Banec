@@ -1,10 +1,5 @@
+// include/blibc/stat.h
 #pragma once
-
-#include "blibc/stdint.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define AT_FDCWD (-100)
 
@@ -44,16 +39,12 @@ extern "C" {
 #define S_ISLNK(m)  (((m) & S_IFMT) == S_IFLNK)
 #define S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK)
 
-// minimal timespec matching kernel/user ABI on x86_64
+// minimal timespec matching kernel/user ABI / x86_64
 struct __timespec {
     long tv_sec;
     long tv_nsec;
 };
 
-/*
- * struct stat layout compatible with linux x86_64 glibc ABI.
- * This matches the kernel-written layout for newfstatat/fstat/stat syscalls.
- */
 struct stat {
     unsigned long   st_dev;     /* device */
     unsigned long   st_ino;     /* inode */
@@ -75,7 +66,3 @@ struct stat {
 /* Function declarations */
 int stat(const char *path, struct stat *st);
 int mkdir(const char *path, unsigned int mode);
-
-#ifdef __cplusplus
-}
-#endif

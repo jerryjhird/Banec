@@ -1,19 +1,10 @@
+// src/blibc/dirent.c
+
 #include "blibc/dirent.h"
 #include "blibc/syscall.h"
 #include "blibc/errno.h"
 #include "blibc/fcntl.h"
 #include "blibc/stdlib.h"
-#include "blibc/stdint.h"
-
-#ifndef SYS_openat
-#define SYS_openat 257
-#endif
-#ifndef SYS_close
-#define SYS_close 3
-#endif
-#ifndef SYS_getdents64
-#define SYS_getdents64 217
-#endif
 
 #define AT_FDCWD -100
 
@@ -26,7 +17,7 @@ struct linux_dirent64 {
 };
 
 DIR *opendir(const char *path) {
-    long fd = bsyscall(SYS_openat, AT_FDCWD, path, O_RDONLY | O_DIRECTORY, 0);
+    long fd = syscall(SYS_openat, AT_FDCWD, path, O_RDONLY | O_DIRECTORY, 0);
     if (fd < 0) {
         errno = (int)(-fd);
         return (void *)0;
@@ -34,7 +25,7 @@ DIR *opendir(const char *path) {
 
     DIR *d = malloc(sizeof(DIR));
     if (!d) {
-        bsyscall(SYS_close, fd);
+        syscall(SYS_close, fd);
         return (void *)0;
     }
 
@@ -48,13 +39,17 @@ struct dirent *readdir(DIR *d) {
     if (!d) return (void *)0;
 
     if (d->pos >= d->len) {
-        long n = bsyscall(SYS_getdents64, d->fd, d->buf, sizeof(d->buf));
+        long n = syscall(SYS_getdents64, d->fd, d->buf, sizeof(d->buf));
         if (n <= 0) return (void *)0;
         d->pos = 0;
         d->len = n;
     }
 
     struct linux_dirent64 *ld = (struct linux_dirent64 *)(d->buf + d->pos);
+
+    if (ld->d_reclen <= 0 || d->pos + ld->d_reclen > d->len)
+        return (void *)0;
+
     d->pos += ld->d_reclen;
 
     static struct dirent out;
@@ -71,9 +66,10 @@ struct dirent *readdir(DIR *d) {
     return &out;
 }
 
+
 int closedir(DIR *d) {
     if (!d) return -1;
-    bsyscall(SYS_close, d->fd);
+    syscall(SYS_close, d->fd);
     free(d);
     return 0;
 }

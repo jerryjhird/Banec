@@ -1,3 +1,5 @@
+// src/coreutils/uname.c
+
 #include "blibc/syscall.h"
 #include "blibc/unistd.h"
 #include "blibc/string.h"
@@ -23,7 +25,7 @@ static void print_field(const char *s, int *first) {
 
 int main(int argc, char **argv) {
     struct utsname u;
-    bsyscall(SYS_uname, &u);
+    syscall(SYS_uname, &u);
 
     /* output flags */
     int print_s = 0, print_n = 0, print_r = 0, print_v = 0;
