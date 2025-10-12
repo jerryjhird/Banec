@@ -27,3 +27,6 @@ ssize_t read(int fd, void *buf, size_t count);
 char *getcwd(char *buf, size_t size);
 int isatty(int fd);
 int access(const char *path, int mode);
+int unlink(const char *pathname);
+int unlinkat(int dirfd, const char *pathname, int flags);
+int rmdir(const char *path);

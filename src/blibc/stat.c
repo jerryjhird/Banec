@@ -3,6 +3,7 @@
 #include "blibc/syscall.h"
 #include "blibc/errno.h"
 #include "blibc/stat.h"
+#include "blibc/fcntl.h"
 
 int stat(const char *path, struct stat *st) {
     long ret = syscall(SYS_newfstatat, AT_FDCWD, path, st, 0);
@@ -20,4 +21,8 @@ int mkdir(const char *path, unsigned int mode) {
         return -1;
     }
     return 0;
+}
+
+int lstat(const char *path, struct stat *st) {
+    return syscall(SYS_newfstatat, AT_FDCWD, (long)path, (long)st, AT_SYMLINK_NOFOLLOW);
 }

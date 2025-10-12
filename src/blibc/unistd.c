@@ -4,16 +4,24 @@
 #include "blibc/stdio.h"         // __set_io_error, __set_io_eof
 #include "blibc/syscall.h"
 #include "blibc/types.h"      // ssize_t
-#include "blibc/stddef.h"
 #include "blibc/errno.h"
 #include "blibc/termios.h"
 #include "blibc/null.h"
+#include "blibc/fcntl.h"
 
 #define BW_BUFSIZE 1024
 static char bbuf1[BW_BUFSIZE];
 static char bbuf2[BW_BUFSIZE];
 static size_t bpos1 = 0;
 static size_t bpos2 = 0;
+
+int unlink(const char *pathname) {
+    return syscall(SYS_unlinkat, AT_FDCWD, pathname, 0);
+}
+
+int unlinkat(int dirfd, const char *pathname, int flags) {
+    return syscall(SYS_unlinkat, dirfd, (long)pathname, flags);
+}
 
 ssize_t write(int fd, const void *buf, size_t count) {
     long ret = syscall(SYS_write, fd, buf, count);
@@ -72,6 +80,10 @@ ssize_t read(int fd, void *buf, size_t count) {
         __set_io_eof(fd);
     }
     return (ssize_t)ret;
+}
+
+int rmdir(const char *path) {
+    return syscall(SYS_unlinkat, AT_FDCWD, (long)path, AT_REMOVEDIR);
 }
 
 char *getcwd(char *buf, size_t size) {

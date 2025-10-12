@@ -66,3 +66,4 @@ struct stat {
 /* Function declarations */
 int stat(const char *path, struct stat *st);
 int mkdir(const char *path, unsigned int mode);
+int lstat(const char *path, struct stat *st);

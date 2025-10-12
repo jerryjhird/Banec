@@ -11,3 +11,6 @@
 #define O_APPEND    0x0400
 #define O_NONBLOCK  0x0800
 #define O_DIRECTORY 0x10000
+
+#define AT_REMOVEDIR 0x200
+#define AT_SYMLINK_NOFOLLOW 0x100
