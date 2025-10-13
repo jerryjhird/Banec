@@ -6,6 +6,14 @@
 #define STRDUP_SLOTS 8
 #define STRDUP_BUFSZ 256
 
+char *strchr(const char *s, int c) {
+    while (*s) {
+        if (*s == (char)c) return (char *)s;
+        s++;
+    }
+    return c == 0 ? (char *)s : NULL; // include null terminator match
+}
+
 // compare 2 strings
 int strcmp(const char *s1, const char *s2) {
     while (*s1 && (*s1 == *s2)) {

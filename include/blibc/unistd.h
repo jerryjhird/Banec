@@ -8,13 +8,12 @@
 #define STDOUT_FILENO  1
 #define STDERR_FILENO  2
 
-/* access() mode flags */
-#define F_OK 0   /* test for existence of file */
-#define X_OK 1   /* test for execute permission */
-#define W_OK 2   /* test for write permission */
-#define R_OK 4   /* test for read permission */
+// access() mode flags
+#define F_OK 0   // existence of file
+#define X_OK 1   // execute permission
+#define W_OK 2   // write permission
+#define R_OK 4   // ead permission
 
-/* Directory-related constants */
 #ifndef AT_FDCWD
 #define AT_FDCWD (-100)
 #endif
@@ -30,3 +29,4 @@ int access(const char *path, int mode);
 int unlink(const char *pathname);
 int unlinkat(int dirfd, const char *pathname, int flags);
 int rmdir(const char *path);
+int chmod(const char *path, mode_t mode);

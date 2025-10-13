@@ -1,5 +1,3 @@
-// src/coreutils/ls.c
-
 #include "config/ls.h"
 #include "config/global.h"
 #include "blibc/dirent.h"
@@ -12,7 +10,30 @@
 #define MAX_PATH CONF_MAX_PATH
 #define MAX_NAMES 1024
 
-static const char *color_for(const char *path) {
+typedef struct {
+    char name[MAX_PATH];
+    unsigned char dtype;
+} file_entry;
+
+static int cmp_entry(const void *a, const void *b) {
+    const file_entry *fa = a;
+    const file_entry *fb = b;
+    return strcmp(fa->name, fb->name);
+}
+
+static const char *color_for(const char *path, unsigned char dtype) {
+    if (dtype != DT_UNKNOWN) {
+        switch (dtype) {
+            case DT_DIR:  return CONF_COLOR_DIR;
+            case DT_LNK:  return CONF_COLOR_LINK;
+            case DT_CHR:  return CONF_COLOR_CHARDEV;
+            case DT_BLK:  return CONF_COLOR_BLOCKDEV;
+            case DT_FIFO: return CONF_COLOR_FIFO;
+            case DT_SOCK: return CONF_COLOR_SOCKET;
+            case DT_REG:  break;
+        }
+    }
+
     struct stat st;
     if (stat(path, &st) < 0)
         return CONF_COLOR_UNKNOWN_FSOBJ;
@@ -24,9 +45,7 @@ static const char *color_for(const char *path) {
     if (S_ISFIFO(st.st_mode)) return CONF_COLOR_FIFO;
     if (S_ISSOCK(st.st_mode)) return CONF_COLOR_SOCKET;
     if (S_ISREG(st.st_mode)) {
-        if (st.st_mode & S_IXUSR)
-            return CONF_COLOR_EXEC;
-        return CONF_COLOR_FILE;
+        return (st.st_mode & S_IXUSR) ? CONF_COLOR_EXEC : CONF_COLOR_FILE;
     }
 
     return CONF_COLOR_UNKNOWN_FSOBJ;
@@ -38,13 +57,14 @@ int main(int argc, char **argv) {
     if (!dir)
         exit(EXIT_FAILURE);
 
-    char names[MAX_NAMES][MAX_PATH];
+    file_entry files[MAX_NAMES];
     size_t n = 0;
 
     struct dirent *ent;
     while ((ent = readdir(dir)) && n < MAX_NAMES) {
-        strncpy(names[n], ent->d_name, MAX_PATH - 1);
-        names[n][MAX_PATH - 1] = '\0';
+        strncpy(files[n].name, ent->d_name, MAX_PATH - 1);
+        files[n].name[MAX_PATH - 1] = '\0';
+        files[n].dtype = ent->d_type;
         n++;
     }
     closedir(dir);
@@ -52,7 +72,7 @@ int main(int argc, char **argv) {
     if (n == 0)
         return 0;
 
-    qsort(names, n, MAX_PATH, namecmp);
+    qsort(files, n, sizeof(file_entry), cmp_entry);
 
     const int tty = isatty(STDOUT_FILENO);
     const char *reset = tty ? "\x1b[0m" : "";
@@ -61,7 +81,7 @@ int main(int argc, char **argv) {
 
     for (int pass = 0; pass < 2; pass++) {
         for (size_t i = 0; i < n; i++) {
-            const char *name = names[i];
+            const char *name = files[i].name;
             int is_dot = strcmp(name, ".") == 0;
             int is_dotdot = strcmp(name, "..") == 0;
 
@@ -77,7 +97,7 @@ int main(int argc, char **argv) {
                 snprintf(full, sizeof(full), "%s/%s", path, name);
 
             if (tty) {
-                const char *color = color_for(full);
+                const char *color = color_for(full, files[i].dtype);
                 size_t name_len = strlen(name) + 2; // +2 for spacing
 
                 if (current_line_len + name_len > CONF_MAX_CHAR_OUTPUT) {
@@ -92,7 +112,6 @@ int main(int argc, char **argv) {
 
                 current_line_len += name_len;
             } else {
-                // notty so one file per line
                 bwrite(1, name, strlen(name));
                 bwrite(1, "\n", 1);
             }

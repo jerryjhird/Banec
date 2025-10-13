@@ -15,6 +15,10 @@ static char bbuf2[BW_BUFSIZE];
 static size_t bpos1 = 0;
 static size_t bpos2 = 0;
 
+int chmod(const char *path, mode_t mode) {
+    return syscall(SYS_chmod, (uintptr_t)path, (uintptr_t)mode);
+}
+
 int unlink(const char *pathname) {
     return syscall(SYS_unlinkat, AT_FDCWD, pathname, 0);
 }
