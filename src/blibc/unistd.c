@@ -9,7 +9,7 @@
 #include "blibc/null.h"
 #include "blibc/fcntl.h"
 
-#define BW_BUFSIZE 1024
+#define BW_BUFSIZE 8192
 static char bbuf1[BW_BUFSIZE];
 static char bbuf2[BW_BUFSIZE];
 static size_t bpos1 = 0;
