@@ -1,5 +1,6 @@
 // include/blibc/unistd.h
-#pragma once
+#ifndef UNISTD_H
+#define UNISTD_H
 
 #include "blibc/types.h"  /* ssize_t */
 
@@ -14,9 +15,7 @@
 #define W_OK 2   // write permission
 #define R_OK 4   // ead permission
 
-#ifndef AT_FDCWD
 #define AT_FDCWD (-100)
-#endif
 
 ssize_t write(int fd, const void *buf, size_t count);
 ssize_t bwrite(int fd, const void *buf, size_t count); // buffered write
@@ -30,3 +29,5 @@ int unlink(const char *pathname);
 int unlinkat(int dirfd, const char *pathname, int flags);
 int rmdir(const char *path);
 int chmod(const char *path, mode_t mode);
+
+#endif

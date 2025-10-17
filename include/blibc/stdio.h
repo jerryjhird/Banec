@@ -1,5 +1,7 @@
 // include/blibc/stdio.h
-#pragma once
+#ifndef STDIO_H
+#define STDIO_H
+
 #include "blibc/types.h"
 #include "blibc/stdarg.h"
 
@@ -52,3 +54,5 @@ int fflush(FILE *f);
 // internal helpers
 void __set_io_error(int fd);
 void __set_io_eof(int fd);
+
+#endif

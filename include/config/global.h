@@ -1,6 +1,8 @@
 // include/config/global.h
 
-#pragma once
+#ifndef GLOBAL_H
+#define GLOBAL_H
+
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 700
 
@@ -11,3 +13,5 @@
 
 #include "blibc/limits.h"
 #define CONF_MAX_PATH                   PATH_MAX
+
+#endif

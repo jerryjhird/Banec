@@ -1,5 +1,6 @@
 // include/blibc/fcntl.h
-#pragma once
+#ifndef FCNTL_H
+#define FCNTL_H
 
 #define O_RDONLY    0x0000
 #define O_WRONLY    0x0001
@@ -14,3 +15,5 @@
 
 #define AT_REMOVEDIR 0x200
 #define AT_SYMLINK_NOFOLLOW 0x100
+
+#endif

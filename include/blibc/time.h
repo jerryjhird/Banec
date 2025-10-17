@@ -1,5 +1,7 @@
 // include/blibc/time.h
-#pragma once
+#ifndef TIME_H
+#define TIME_H
+
 #include "blibc/types.h"
 
 typedef long time_t;
@@ -20,3 +22,5 @@ int clock_gettime(int clk_id, struct timespec *tp);
 time_t time(time_t *t);
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
 size_t strftime(char *s, size_t max, const char *fmt, const struct tm *tm);
+
+#endif

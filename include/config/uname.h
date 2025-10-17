@@ -1,5 +1,6 @@
 // include/config/uname.h
-#pragma once
+#ifndef UNAME_H
+#define UNAME_H
 
 /*
  * default uname output mode.
@@ -15,3 +16,5 @@
  *   "all"       → print all (-a)
  */
 #define CONF_UNAME_DEFAULT_METHOD "kernel"
+
+#endif

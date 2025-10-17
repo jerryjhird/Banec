@@ -1,5 +1,8 @@
 // include/blibc/string.h
-#pragma once
+
+#ifndef STRING_H
+#define STRING_H
+
 #include "blibc/stddef.h"
 #include "blibc/null.h"
 
@@ -17,3 +20,5 @@ char *strerror(int errnum);
 char *strdup(const char *s);
 size_t strlen(const char *s);
 int namecmp(const void *a, const void *b);
+
+#endif

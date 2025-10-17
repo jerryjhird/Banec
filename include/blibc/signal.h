@@ -1,5 +1,6 @@
 // include/blibc/signal.h
-#pragma once
+#ifndef SIGNAL_H
+#define SIGNAL_H
 
 #define SIGHUP     1
 #define SIGINT     2
@@ -31,3 +32,5 @@
 #define SIGIO     29
 #define SIGPWR    30
 #define SIGSYS    31
+
+#endif

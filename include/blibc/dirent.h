@@ -1,5 +1,7 @@
 // include/blibc/dirent.h
-#pragma once
+#ifndef DIRENT_H
+#define DIRENT_H
+
 #include "blibc/types.h"
 #include "blibc/stdint.h"
 
@@ -32,3 +34,5 @@ typedef struct {
 DIR *opendir(const char *path);
 struct dirent *readdir(DIR *d);
 int closedir(DIR *d);
+
+#endif

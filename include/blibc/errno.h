@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ERRNO_H
+#define ERRNO_H
 
 // thread-local errno variable
 extern __thread int errno;
@@ -140,3 +141,5 @@ extern __thread int errno;
 #define ENOTRECOVERABLE 131
 #define ERFKILL        132
 #define EHWPOISON      133
+
+#endif

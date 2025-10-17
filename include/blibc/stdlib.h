@@ -1,5 +1,8 @@
 // include/blibc/stdlib.h
-#pragma once
+
+#ifndef STDLIB_H
+#define STDLIB_H
+
 #include "blibc/types.h"
 
 /* malloc family */
@@ -27,3 +30,5 @@ char *itoa(int value, char *str, int base);
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
+
+#endif

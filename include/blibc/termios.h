@@ -1,5 +1,7 @@
 // include/blibc/termios.h
-#pragma once
+#ifndef TERMIOS_H
+#define TERMIOS_H
+
 #include "blibc/types.h"
 
 // Basic terminal I/O types
@@ -20,3 +22,5 @@ struct termios {
     speed_t  c_ispeed;    // input speed
     speed_t  c_ospeed;    // output speed
 };
+
+#endif

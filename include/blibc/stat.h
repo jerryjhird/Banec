@@ -1,5 +1,6 @@
 // include/blibc/stat.h
-#pragma once
+#ifndef STAT_H
+#define STAT_H
 
 #define AT_FDCWD (-100)
 
@@ -67,3 +68,5 @@ struct stat {
 int stat(const char *path, struct stat *st);
 int mkdir(const char *path, unsigned int mode);
 int lstat(const char *path, struct stat *st);
+
+#endif

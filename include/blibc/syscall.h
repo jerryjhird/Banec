@@ -1,5 +1,6 @@
 // include/blibc/syscall.h
-#pragma once
+#ifndef SYSCALL_H
+#define SYSCALL_H
 
 long syscall(long n, ...);
 
@@ -101,3 +102,5 @@ long syscall(long n, ...);
 #define SYS_unlinkat 263
 #define SYS_mkdirat  258
 #define SYS_close_range 436
+
+#endif

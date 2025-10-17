@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CTYPE_H
+#define CTYPE_H
 
 static inline int isspace(int c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
@@ -19,3 +20,5 @@ static inline int isalnum(int c) {
 static inline int isprint(int c) {
     return c >= 32 && c < 127;
 }
+
+#endif

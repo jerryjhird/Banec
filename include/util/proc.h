@@ -1,5 +1,7 @@
 // include/util/proc.h
-#pragma once
+#ifndef PROC_H
+#define PROC_H
+
 #include "blibc/syscall.h"
 #include "blibc/dirent.h"
 #include "blibc/string.h"
@@ -35,3 +37,5 @@ static inline void proc_iterate(proc_iter_fn fn, void *udata) {
     }
     closedir(d);
 }
+
+#endif

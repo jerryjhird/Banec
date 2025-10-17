@@ -1,6 +1,7 @@
 // include/config/ls.h
 
-#pragma once
+#ifndef LS_H
+#define LS_H
 
 #define CONF_COLOR_DIR                  "\x1b[01;34m"
 #define CONF_COLOR_FILE                 "\x1b[00m"
@@ -15,3 +16,5 @@
 #define CONF_MAX_CHAR_OUTPUT            100
 #define CONF_COLOR_UNKNOWN_FSOBJ        CONF_COLOR_FILE
 #define CONF_MISSING_HOMEDIR_FALLBACK   "."
+
+#endif
