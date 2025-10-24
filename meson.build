@@ -46,7 +46,8 @@ utils = {
     'src/coreutils/whoami.c': 'whoami',
     'src/coreutils/date.c': 'date',
     'src/coreutils/rm.c': 'rm',
-    'src/coreutils/rmdir.c': 'rmdir'
+    'src/coreutils/rmdir.c': 'rmdir',
+    'src/coreutils/segfault.c': 'segfault'
 }
 
 blibc_src = [
